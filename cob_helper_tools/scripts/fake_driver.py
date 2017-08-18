@@ -1,19 +1,30 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+#################################################################
+##\file
 #
-# Copyright 2017 Fraunhofer Institute for Manufacturing Engineering and Automation (IPA)
+# \note
+#   Copyright (c) Felix Messmer \n
+#   Fraunhofer Institute for Manufacturing Engineering
+#   and Automation (IPA) \n
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#   All rights reserved. \n\n
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+#################################################################
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+# \note
+#   Repository name: cob_command_tools
+# \note
+#   ROS package name: cob_helper_tools
+#
+# \author
+#   Author: Felix Messmer
+#
+# \date Date of creation: January 2017
+#
+# \brief
+#   A script providing services to fake a (ros_canopen) driver
+#
+#################################################################
 
 import rospy
 from std_srvs.srv import *
