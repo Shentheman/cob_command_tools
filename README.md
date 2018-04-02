@@ -15,3 +15,5 @@
     * `git add -A`
     * `git commit -am <commit messages>`
     * `git push origin master`
+* On 04/01/18, we merge the new changes from the release [0.6.7](https://github.com/ipa320/cob_command_tools/releases)
+
