@@ -26,7 +26,6 @@
 #
 #################################################################
 
-import copy
 import rospy
 
 from cob_msgs.msg import EmergencyStopState
@@ -38,38 +37,36 @@ sss = simple_script_server()
 class AutoRecover():
 
   def __init__(self):
-    now = rospy.Time.now()
+    self.components = rospy.get_param('~components', [])
     self.em_state = 0
-    self.components = rospy.get_param('~components', {})
-    self.components_recover_time = {}
-    for component in self.components.keys():
-      self.components_recover_time[component] = now
-    rospy.Subscriber("/emergency_stop_state", EmergencyStopState, self.em_cb, queue_size=1)
-    rospy.Subscriber("/diagnostics_agg", DiagnosticArray, self.diagnostics_cb, queue_size=1)
+    rospy.Subscriber("/emergency_stop_state", EmergencyStopState, self.em_cb)
+    rospy.Subscriber("/diagnostics_agg", DiagnosticArray, self.diagnostics_cb)
+    self.last_time_recover = rospy.Time.now()
 
-  # auto recover based on diagnostics
   def em_cb(self, msg):
-    if msg.emergency_state == 0 and self.em_state != 0:
-      rospy.loginfo("auto_recover from emergency state")
-      self.recover(self.components.keys())
-    self.em_state = copy.deepcopy(msg.emergency_state)
+    if msg.emergency_state != self.em_state:
+      if msg.emergency_state == 0:
+        rospy.loginfo("auto_recover from scanner stop")
+        self.recover()
+      self.em_state = msg.emergency_state
 
-  def recover(self, components):
-    for component in components:
+  def recover(self):
+    # call recover for all components
+    for component in self.components:
       handle = sss.recover(component)
       if not (handle.get_error_code() == 0):
         rospy.logerr("[auto_recover]: Could not recover %s", component)
       else:
         rospy.loginfo("[auto_recover]: Component %s recovered successfully", component)
-        self.components_recover_time[component] = rospy.Time.now()
+        self.last_time_recover = rospy.Time.now()
 
   # auto recover based on diagnostics
   def diagnostics_cb(self, msg):
     for status in msg.status:
-      for component in self.components.keys():
-        if status.name.startswith(self.components[component]) and status.level > 0 and self.em_state == 0 and (rospy.Time.now() - self.components_recover_time[component] > rospy.Duration(10)):
+      if status.level > 1: # only recover on error, not on warning status
+        if "Actuators" in status.name and self.em_state == 0 and (rospy.Time.now() - self.last_time_recover) > rospy.Duration(10):
           rospy.loginfo("auto_recover from diagnostic failure")
-          self.recover([component])
+          self.recover()
 
 if __name__ == "__main__":
   rospy.init_node("auto_recover")

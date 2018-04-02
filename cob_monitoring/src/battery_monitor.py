@@ -106,9 +106,6 @@ class battery_monitor():
                 return
             self.sound_components = rospy.get_param("~sound_components")
 
-        self.sound_critical = rospy.get_param("~sound_critical", "My battery is empty, please recharge now.")
-        self.sound_warning = rospy.get_param("~sound_warning", "My battery is nearly empty, please consider recharging.")
-
         self.last_time_warned = rospy.get_time()
         self.last_time_power_received = rospy.get_time()
         rospy.Subscriber(self.topic_name, PowerState, self.power_callback)
@@ -176,7 +173,7 @@ class battery_monitor():
                 mode.pulses = 4
                 self.set_light(mode)
 
-                self.say(self.sound_critical)
+                self.say("My battery is empty, please recharge now.")
 
             # 10%
             elif self.power_state.relative_remaining_capacity <= self.threshold_error and (rospy.get_time() - self.last_time_warned) > 15:
@@ -201,7 +198,7 @@ class battery_monitor():
                 mode.pulses = 2
                 self.set_light(mode)
 
-                self.say(self.sound_warning)
+                self.say("My battery is nearly empty, please consider recharging.")
 
         if self.is_charging == False and self.power_state.charging == True:
             self.is_charging = True
